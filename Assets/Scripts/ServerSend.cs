@@ -79,9 +79,10 @@ public class ServerSend
             packet.Write(player.stats.deaths);
             packet.Write(player.stats.score);
             packet.Write(player.stats.kills);
-            packet.Write(player.stats.hasWeapon);
+            packet.Write((int)player.stats.equippedWeapon);
             packet.Write(player.stats.health);
-            Debug.Log($"Sent spawn {player.id} to {toClient}");
+            packet.Write(player.stats.armor);
+            Debug.Log($"Sent spawn {player.id} to {toClient} with weapon {(int)player.stats.equippedWeapon}");
             SendTCPData(toClient, packet);
         }
     }
@@ -121,8 +122,22 @@ public class ServerSend
             packet.Write(spawnerId);
             packet.Write(position);
             packet.Write(hasItem);
+            packet.Write((int)ItemSpawner.spawners[spawnerId].weaponType);
 
             SendTCPData(toClient, packet);
+        }
+    }
+
+    public static void CreateItemSpawner(int spawnerId, Vector3 position, bool hasItem)
+    {
+        using (Packet packet = new Packet((int)ServerPackets.createItemSpawner))
+        {
+            packet.Write(spawnerId);
+            packet.Write(position);
+            packet.Write(hasItem);
+            packet.Write((int)ItemSpawner.spawners[spawnerId].weaponType);
+
+            SendTCPDataToAll(packet);
         }
     }
 
@@ -133,7 +148,6 @@ public class ServerSend
             packet.Write(spawnerId);
             SendTCPDataToAll(packet);
         }
-
     }
 
     public static void ItemPickedUp(int spawnerId, int byPlayer)
@@ -157,4 +171,74 @@ public class ServerSend
         }
     }
 
+    public static void PlayerArmor(Player player)
+    {
+        using (Packet packet = new Packet((int)ServerPackets.playerArmor))
+        {
+            packet.Write(player.id);
+            packet.Write(player.stats.armor);
+
+            SendTCPDataToAll(packet);
+        }
+    }
+
+    public static void EquippedWeapon(Player player, WeaponTypes type)
+    {
+        using (Packet packet = new Packet((int)ServerPackets.equippedWeapon))
+        {
+            packet.Write(player.id);
+            packet.Write((int)type);
+
+            SendTCPDataToAll(packet);
+        }
+
+        Weapon weapon = player.transform.root.GetComponent<Inventory>().GetActiveWeaponStats();
+        if (weapon != null)
+            ServerSend.PlayerAmmo(player.id, weapon.currentMagazine, weapon.ammo);
+    }
+
+    public static void UnEquippedWeapon(int playerId)
+    {
+        using (Packet packet = new Packet((int)ServerPackets.unEquippedWeapon))
+        {
+            packet.Write(playerId);
+
+            SendTCPDataToAll(packet);
+        }
+    }
+
+    public static void PlayerAmmo(int toPlayer, int magazine, int reserve)
+    {
+        using (Packet packet = new Packet((int)ServerPackets.playerAmmo))
+        {
+            packet.Write(toPlayer);
+            packet.Write(magazine);
+            packet.Write(reserve);
+
+            SendTCPData(toPlayer, packet);
+        }
+    }
+
+    public static void PlayerWeapons(int toPlayer, WeaponTypes[] weapons)
+    {
+        using (Packet packet = new Packet((int)ServerPackets.playerWeapons))
+        {
+            packet.Write((int)weapons[0]);
+            packet.Write((int)weapons[1]);
+            packet.Write((int)weapons[2]);
+            packet.Write((int)weapons[3]);
+
+            SendTCPData(toPlayer, packet);
+        }
+    }
+
+    public static void PlayerEliminated(int playerId)
+    {
+
+        using (Packet packet = new Packet((int)ServerPackets.playerEliminated))
+        {
+            packet.Write(playerId);
+            SendTCPDataToAll(packet);
+        }
+    }
 }

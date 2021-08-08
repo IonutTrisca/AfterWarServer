@@ -10,17 +10,19 @@ public class PlayerStats : MonoBehaviour
     public bool hasArmor;
     public float armor;
 
-    public bool hasWeapon;
+    public WeaponTypes equippedWeapon;
 
     public int deaths;
     public int kills;
     public int score;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
+        equippedWeapon = WeaponTypes.NoWeapon;
         health = 100f;
         armor = 0;
+        Debug.Log("Set player stats");
     }
 
     // Update is called once per frame

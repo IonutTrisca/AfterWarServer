@@ -16,10 +16,8 @@ public class ItemCollector : MonoBehaviour
     {
         if (other.tag == "ItemSpawner")
         {
+            Debug.Log("Collided with item spawner");
             other.GetComponent<ItemSpawner>().Collided(this);
-        }
-        if (other.tag == "Weapon" && !stats.hasWeapon)
-        {
         }
     }
 }

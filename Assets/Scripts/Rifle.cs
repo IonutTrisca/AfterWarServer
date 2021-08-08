@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Rifle : Weapon
 {
-    public float damage = 3f;
     public float range = 100f;
     public float fireRate = 15f;
     public Transform shootOrigin;
@@ -14,7 +13,7 @@ public class Rifle : Weapon
     // Start is called before the first frame update
     void Start()
     {
-        shootOrigin = RecursiveFindChild(transform.root, "MainCamera");
+        shootOrigin = Utils.RecursiveFindChild(transform.root, "MainCamera");
     }
 
     // Update is called once per frame
@@ -50,25 +49,5 @@ public class Rifle : Weapon
                 ServerSend.PlayerHealth(hit.transform.GetComponent<Player>());
             }
         }
-    }
-
-    Transform RecursiveFindChild(Transform parent, string tag)
-    {
-        foreach (Transform child in parent)
-        {
-            if (child.tag == tag)
-            {
-                return child;
-            }
-            else
-            {
-                Transform found = RecursiveFindChild(child, tag);
-                if (found != null)
-                {
-                    return found;
-                }
-            }
-        }
-        return null;
     }
 }

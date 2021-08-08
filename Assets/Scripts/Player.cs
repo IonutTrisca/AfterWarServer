@@ -11,15 +11,19 @@ public class Player : MonoBehaviour
     public float spineAngle;
 
     public PlayerStats stats;
+    public Inventory inventory;
 
     public bool[] keysPressed;
     public bool isGrounded;
+
+    public int interactionRange = 20;
 
     public void Initialize(int id, string username)
     {
         this.id = id;
         this.username = username;
         keysPressed = new bool[7];
+        
     }
 
     public void FixedUpdate()
@@ -40,6 +44,44 @@ public class Player : MonoBehaviour
             keysPressed[i] = keys[i];
         }
     }
+
+    public void EquipWeapon(int slot)
+    {
+        Inventory inventory = transform.root.GetComponent<Inventory>();
+        inventory.SelectWeapon(slot);
+    }
+
+    public void Interact()
+    {
+        RaycastHit hit;
+
+        Transform rig = Utils.RecursiveFindChild(transform.root, "Rig");
+        rig.gameObject.SetActive(false);
+
+        if (Physics.Raycast(shootOrigin.position, shootOrigin.forward, out hit, interactionRange))
+        {
+            if (hit.transform.root.tag == "ItemSpawner")
+            {
+                Debug.Log("Interacted with item spawner");
+                hit.transform.root.GetComponent<ItemSpawner>().Collided(this.transform.root.GetComponent<ItemCollector>());
+            }
+        }
+
+        rig.gameObject.SetActive(true);
+    }
+
+    public void PlayerEliminated()
+    {
+        ServerSend.PlayerEliminated(id);
+        StartCoroutine(EliminatePlayer());
+    }
+
+    public IEnumerator EliminatePlayer()
+    {
+        yield return new WaitForSeconds(5f);
+        Server.clients[id].Disconnect();
+    }
+
 
     /*public void Shoot(Vector3 viewDirection)
     {

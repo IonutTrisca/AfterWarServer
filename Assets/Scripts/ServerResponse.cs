@@ -39,10 +39,44 @@ public class ServerResponse
             Server.clients[fromClient].player.SetKeysPressed(keysPressed);
             Server.clients[fromClient].player.isGrounded = isGrounded;
             Server.clients[fromClient].player.shootOrigin.rotation = cameraRotation;
-        } catch (Exception e)
+        } catch (Exception)
         {
             Debug.LogError("Some error");
         }
         
+    }
+
+    public static void EquipWeapon(int fromClient, Packet packet)
+    {
+        int slot = packet.ReadInt();
+        Server.clients[fromClient].player.EquipWeapon(slot);
+    }
+
+    public static void DropWeapon(int fromClient, Packet packet)
+    {
+        WeaponTypes type = (WeaponTypes)packet.ReadInt();
+        ServerSend.UnEquippedWeapon(fromClient);
+
+        Server.clients[fromClient].player.inventory.RemoveCurrentWeapon();
+
+        Vector3 pos = Server.clients[fromClient].player.transform.position;
+        pos.x -= 3;
+        pos.y += 1;
+        ItemSpawner spawner = NetworkManager.instance.InstantiateItemSpawner(type, pos);
+        Debug.Log("Spawning spawner wepan dropped");
+        Debug.Log("ID " + spawner.spawnerId);
+        ServerSend.CreateItemSpawner(spawner.spawnerId, pos, spawner.hasItem);
+    }
+
+    public static void Interact(int fromClient, Packet packet)
+    {
+        Server.clients[fromClient].player.Interact();
+    }
+
+    public static void Reload(int fromClient, Packet packet)
+    {
+        Weapon weapon = Server.clients[fromClient].player.inventory.GetActiveWeaponStats();
+        if (weapon != null)
+            weapon.Reload();
     }
 }

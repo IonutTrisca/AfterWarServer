@@ -31,7 +31,12 @@ public enum ServerPackets
     playerMovement,
     createItemSpawner,
     itemSpawned,
-    itemPickedUp
+    itemPickedUp,
+    equippedWeapon,
+    unEquippedWeapon,
+    playerArmor,
+    playerAmmo,
+    playerWeapons
 }
 public enum MatchStage
 {
@@ -52,7 +57,11 @@ public enum ClientPackets
     playerMovement,
     playerShoot,
     playerThrowItem,
-    playerChat
+    playerChat,
+    equipWeapon,
+    dropWeapon,
+    interact,
+    reload
 }
 
 public class Packet : IDisposable
